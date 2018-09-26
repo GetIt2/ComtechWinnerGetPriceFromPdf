@@ -10,18 +10,29 @@ namespace ComtechWinnerGetPriceFromPdf
     {
         static void Main(string[] args)
         {
-            DirectoryInfo di = new DirectoryInfo(@"C:\GET\GET-Academy Solutions\Comtech Winner pris beregner");
-            FileInfo[] files = di.GetFiles("Tilbud-1.pdf", SearchOption.AllDirectories);
+            var files = GetAllFilesFromFolder();
             var totalPrice = 0;
             foreach (var file in files)
             {
-                Console.WriteLine(file.DirectoryName + "\\" + file.Name);
-                PdfReader pdfReader = new PdfReader(file.DirectoryName + "\\" + file.Name);
-                ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
-                string currentText = PdfTextExtractor.GetTextFromPage(pdfReader, pdfReader.NumberOfPages, strategy);
+                var currentText = GetTextFromFile(file);
                 totalPrice += GetPriceFromText(currentText);
             }
             Console.WriteLine(totalPrice);
+        }
+
+        private static string GetTextFromFile(FileInfo file)
+        {
+            PdfReader pdfReader = new PdfReader(file.DirectoryName + "\\" + file.Name);
+            ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
+            string currentText = PdfTextExtractor.GetTextFromPage(pdfReader, pdfReader.NumberOfPages, strategy);
+            return currentText;
+        }
+
+        private static FileInfo[] GetAllFilesFromFolder()
+        {
+            DirectoryInfo di = new DirectoryInfo(@"C:\GET\GET-Academy Solutions\Comtech Winner pris beregner");
+            FileInfo[] files = di.GetFiles("Tilbud-1.pdf", SearchOption.AllDirectories);
+            return files;
         }
 
         private static int GetPriceFromText(string currentText)
@@ -45,8 +56,6 @@ namespace ComtechWinnerGetPriceFromPdf
                     || word == "NOK") wordsCorrect++;
                 else wordsCorrect = 0;
             }
-
-            Console.WriteLine(price);
             if (price == "") price = "0";
             var roundedPrice = price.Split(',');
             return int.Parse(roundedPrice[0]);
