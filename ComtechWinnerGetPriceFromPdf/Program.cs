@@ -15,13 +15,14 @@ namespace ComtechWinnerGetPriceFromPdf
             foreach (var file in files)
             {
                 var currentText = GetTextFromFile(file);
-                totalPrice += GetPriceFromText(currentText);
+                totalPrice += GetPriceFromText(currentText, false);
             }
             Console.WriteLine(totalPrice);
         }
 
         private static string GetTextFromFile(FileInfo file)
         {
+            Console.WriteLine(file.DirectoryName + "\\" + file.Name);
             PdfReader pdfReader = new PdfReader(file.DirectoryName + "\\" + file.Name);
             ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
             string currentText = PdfTextExtractor.GetTextFromPage(pdfReader, pdfReader.NumberOfPages, strategy);
@@ -35,7 +36,7 @@ namespace ComtechWinnerGetPriceFromPdf
             return files;
         }
 
-        private static int GetPriceFromText(string currentText)
+        private static int GetPriceFromText(string currentText, bool priceNotFoundOnFirstAttempt)
         {
             var firstSplit = currentText.Split(' ');
             var wordsCorrect = 0;
@@ -49,15 +50,19 @@ namespace ComtechWinnerGetPriceFromPdf
                     secondPartOfPrice = !secondPartOfPrice;
                     price += word;
                 }
-
                 if (word == "Totalt"
                     || word == "ink"
                     || word == "MVA"
-                    || word == "NOK") wordsCorrect++;
+                    || word == "NOK"
+                    || (word == "eks"
+                        && priceNotFoundOnFirstAttempt)) wordsCorrect++;
                 else wordsCorrect = 0;
             }
-            if (price == "") price = "0";
+
+            if (price == "" && priceNotFoundOnFirstAttempt) price = "0";
+            if (price == "") return GetPriceFromText(currentText, true);
             var roundedPrice = price.Split(',');
+            Console.WriteLine(roundedPrice[0]);
             return int.Parse(roundedPrice[0]);
         }
 
