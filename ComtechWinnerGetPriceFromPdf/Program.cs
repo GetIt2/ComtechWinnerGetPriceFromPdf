@@ -25,13 +25,17 @@ namespace ComtechWinnerGetPriceFromPdf
             Console.WriteLine(file.DirectoryName + "\\" + file.Name);
             PdfReader pdfReader = new PdfReader(file.DirectoryName + "\\" + file.Name);
             ITextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
-            string currentText = PdfTextExtractor.GetTextFromPage(pdfReader, pdfReader.NumberOfPages, strategy);
+            var currentText = "";
+            for (int i = 1; i <= pdfReader.NumberOfPages; i++)
+            {
+               currentText += PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy); 
+            }
             return currentText;
         }
 
         private static FileInfo[] GetAllFilesFromFolder()
         {
-            DirectoryInfo di = new DirectoryInfo(@"C:\GET\GET-Academy Solutions\Comtech Winner pris beregner");
+            DirectoryInfo di = new DirectoryInfo(@"C:\GET\GET-Academy Solutions\Comtech Winner pris beregner\");
             FileInfo[] files = di.GetFiles("Tilbud-1.pdf", SearchOption.AllDirectories);
             return files;
         }
@@ -45,6 +49,7 @@ namespace ComtechWinnerGetPriceFromPdf
             var words = SplitOnNewLine(firstSplit);
             foreach (var word in words)
             {
+               // Console.WriteLine($"/{word}\\");
                 if (wordsCorrect == 4 || secondPartOfPrice)
                 {
                     secondPartOfPrice = !secondPartOfPrice;
