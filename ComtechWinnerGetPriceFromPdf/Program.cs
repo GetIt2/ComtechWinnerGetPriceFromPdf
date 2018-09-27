@@ -10,14 +10,19 @@ namespace ComtechWinnerGetPriceFromPdf
     {
         static void Main(string[] args)
         {
-            var files = GetAllFilesFromFolder();
-            var totalPrice = 0;
-            foreach (var file in files)
+            while (true)
             {
-                var currentText = GetTextFromFile(file);
-                totalPrice += GetPriceFromText(currentText, false);
+                Console.Write("Insert folder location: ");
+                var fileLoc = Console.ReadLine();
+                var files = GetAllFilesFromFolder(fileLoc);
+                var totalPrice = 0;
+                foreach (var file in files)
+                {
+                    var currentText = GetTextFromFile(file);
+                    totalPrice += GetPriceFromText(currentText, false);
+                }
+                Console.WriteLine("Total: " + totalPrice.ToString("##,###"));
             }
-            Console.WriteLine(totalPrice);
         }
 
         private static string GetTextFromFile(FileInfo file)
@@ -28,14 +33,14 @@ namespace ComtechWinnerGetPriceFromPdf
             var currentText = "";
             for (int i = 1; i <= pdfReader.NumberOfPages; i++)
             {
-               currentText += PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy); 
+                currentText += PdfTextExtractor.GetTextFromPage(pdfReader, i, strategy);
             }
             return currentText;
         }
 
-        private static FileInfo[] GetAllFilesFromFolder()
+        private static FileInfo[] GetAllFilesFromFolder(string fileLoc)
         {
-            DirectoryInfo di = new DirectoryInfo(@"C:\GET\GET-Academy Solutions\Comtech Winner pris beregner\");
+            DirectoryInfo di = new DirectoryInfo(fileLoc);
             FileInfo[] files = di.GetFiles("Tilbud-1.pdf", SearchOption.AllDirectories);
             return files;
         }
@@ -49,7 +54,7 @@ namespace ComtechWinnerGetPriceFromPdf
             var words = SplitOnNewLine(firstSplit);
             foreach (var word in words)
             {
-               // Console.WriteLine($"/{word}\\");
+                // Console.WriteLine($"/{word}\\");
                 if (wordsCorrect == 4 || secondPartOfPrice)
                 {
                     secondPartOfPrice = !secondPartOfPrice;
@@ -67,8 +72,9 @@ namespace ComtechWinnerGetPriceFromPdf
             if (price == "" && priceNotFoundOnFirstAttempt) price = "0";
             if (price == "") return GetPriceFromText(currentText, true);
             var roundedPrice = price.Split(',');
-            Console.WriteLine(roundedPrice[0]);
-            return int.Parse(roundedPrice[0]);
+            var priceInInt = int.Parse(roundedPrice[0]);
+            Console.WriteLine("Kr: " + priceInInt.ToString("##,###"));
+            return priceInInt;
         }
 
         private static string[] SplitOnNewLine(string[] firstSplit)
